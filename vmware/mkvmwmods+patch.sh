@@ -34,25 +34,17 @@ for i in "${!mod_name[@]}"; do
 	else
 		echo "the module archive ${mod_name[i]}.tar doesn/'t exist"
 	fi
-	
-	# apply patches
-	patch1=$(/usr/bin/pwd)/"${mod_name[i]}"-userif.patch
-	patch2=$(/usr/bin/pwd)/"${mod_name[i]}"-hostif.patch
-	
-	# vmnet patch
-	if [[ "$kern_ver" == "4.9" ]] && [[ ${mod_name[i]} == "vmnet" ]]; then
-	    patch $vmw_source/"${mod_name[i]}"-only/userif.c "$patch1" 
-	else
-		echo "Not kernel 4.9 or vmnet module, bypassing patch"
-	fi
+done	
 
-	# vmmon patch
-	if [[ $kern_ver == "4.9" ]] && [[ ${mod_name[i]} == vmmon ]]; then
-	    patch $vmw_source/"${mod_name[i]}"-only/linux/hostif.c "$patch2"
-	else
-		echo "Not kernel 4.9 or vmmon module, bypassing patch"
-	fi
-	
+# apply patches
+patchfile=$(/usr/bin/pwd)/vmware.patch
+if [[ $kern_ver == "4.9" ]]; then
+    patch -p 1 -u -d "$vmw_source" -i "$patchfile"
+else
+    echo "Not kernel 4.9, bypassing patch"
+fi
+
+for i in "${!mod_name[@]}"; do
 	# make module
 	if [[ -d "$vmw_source/${mod_name[i]}-only" ]]; then
 		make -C $vmw_source/"${mod_name[i]}"-only/
