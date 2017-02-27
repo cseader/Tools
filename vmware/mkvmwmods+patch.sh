@@ -5,7 +5,7 @@ vmw_source=/usr/lib/vmware/modules/source
 mod_dest=/lib/modules/$(uname -r)/kernel/drivers/misc
 mod_name=(vmnet vmmon)
 vmw_ver=$(/usr/bin/vmware -v | awk '{ print $3 }')
-kern_ver=$(uname -r | cut -c 1-4)
+kern_ver=$(uname -r | awk -F'.' '{print $1"."$2}')
 
 if [[ $vmw_ver == "12.5.2" ]]; then
 
@@ -41,7 +41,7 @@ patchfile=$(/usr/bin/pwd)/vmware.patch
 if [[ $kern_ver == "4.10" ]]; then
     patch -p 1 -u -d "$vmw_source" -i "$patchfile"
 else
-    echo "Not kernel 4.9, bypassing patch"
+    echo "Not kernel 4.10, bypassing patch"
 fi
 
 for i in "${!mod_name[@]}"; do
