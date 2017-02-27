@@ -1,6 +1,6 @@
 diff -Naur source/vmmon-only/linux/hostif.c source-new/vmmon-only/linux/hostif.c
 --- source/vmmon-only/linux/hostif.c	2016-11-12 01:15:51.000000000 -0600
-+++ source-new/vmmon-only/linux/hostif.c	2017-01-03 10:08:31.085094963 -0600
++++ source-new/vmmon-only/linux/hostif.c	2017-02-27 14:37:01.148818155 -0600
 @@ -1162,12 +1162,16 @@
     int retval;
  
@@ -20,21 +20,22 @@ diff -Naur source/vmmon-only/linux/hostif.c source-new/vmmon-only/linux/hostif.c
     return retval != numPages;
 diff -Naur source/vmnet-only/userif.c source-new/vmnet-only/userif.c
 --- source/vmnet-only/userif.c	2016-11-12 01:15:55.000000000 -0600
-+++ source-new/vmnet-only/userif.c	2017-01-03 10:07:39.032655612 -0600
-@@ -113,12 +113,16 @@
++++ source-new/vmnet-only/userif.c	2017-02-27 14:37:01.140818155 -0600
+@@ -113,11 +113,15 @@
     int retval;
  
     down_read(&current->mm->mmap_sem);
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
-+     retval = get_user_pages(addr, 1, 0, &page, NULL);
++     retval = get_user_pages(addr, 1, FOLL_WRITE, &page, NULL);
 +#else
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0)
-    retval = get_user_pages(addr, 1, 1, 0, &page, NULL);
+-   retval = get_user_pages(addr, 1, 1, 0, &page, NULL);
++     retval = get_user_pages(addr, 1, 1, 0, &page, NULL);
  #else
-    retval = get_user_pages(current, current->mm, addr,
-                            1, 1, 0, &page, NULL);
- #endif
+-   retval = get_user_pages(current, current->mm, addr,
+-                           1, 1, 0, &page, NULL);
++     retval = get_user_pages(current, current->mm, addr,
++                 1, 1, 0, &page, NULL);
 +#endif
+ #endif
     up_read(&current->mm->mmap_sem);
- 
-    if (retval != 1) {
