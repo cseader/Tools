@@ -4,8 +4,14 @@
 vmw_source=/usr/lib/vmware/modules/source
 mod_dest=/lib/modules/$(uname -r)/kernel/drivers/misc
 mod_name=(vmnet vmmon)
-vmw_ver=$(/usr/bin/vmware -v | awk '{ print $3 }')
 kern_ver=$(uname -r | awk -F'.' '{print $1"."$2}')
+
+# Uncomment ONLY one line below...auto/manual VMW version identification
+vmw_ver=$(/usr/bin/vmware -v | awk '{ print $3 }')  # Automatically identify VMW version
+# vmw_ver="12.5.2"  # Manually specify VMW version (on systems using different path ie: Fedora)
+
+# Kernel version this patch intends to address
+target_kern_ver="4.10"
 
 if [[ $vmw_ver == "12.5.2" ]]; then
 
@@ -38,10 +44,10 @@ done
 
 # apply patches
 patchfile=$(/usr/bin/pwd)/vmware.patch
-if [[ $kern_ver == "4.10" ]]; then
+if [[ $kern_ver == $target_kern_ver ]]; then
     patch -p 1 -u -d "$vmw_source" -i "$patchfile"
 else
-    echo "Not kernel 4.10, bypassing patch"
+    echo "Bypassing patch: Kernel version doesn't match patch's specified target."
 fi
 
 for i in "${!mod_name[@]}"; do
