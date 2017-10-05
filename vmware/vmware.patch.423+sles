@@ -1,0 +1,38 @@
+diff -u source/vmnet-only/netif.c source-new/vmnet-only/netif.c
+--- source/vmnet-only/netif.c	2017-06-19 21:54:39.000000000 -0500
++++ source-new/vmnet-only/netif.c	2017-08-03 17:48:54.251348543 -0500
+@@ -465,7 +465,7 @@
+    VNetSend(&netIf->port.jack, skb);
+ 
+    netIf->stats.tx_packets++;
+-   compat_netif_trans_update(dev);
++   netif_trans_update(dev);
+ 
+    return 0;
+ }
+diff -u source/vmnet-only/userif.c source-new/vmnet-only/userif.c
+--- source/vmnet-only/userif.c	2017-06-19 21:54:39.000000000 -0500
++++ source-new/vmnet-only/userif.c	2017-08-03 17:49:28.143349659 -0500
+@@ -121,8 +121,7 @@
+ #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0)
+    retval = get_user_pages(addr, 1, 1, 0, &page, NULL);
+ #else
+-   retval = get_user_pages(current, current->mm, addr,
+-                           1, 1, 0, &page, NULL);
++   retval = get_user_pages(addr, 1, 0, &page, NULL);
+ #endif
+    up_read(&current->mm->mmap_sem);
+ 
+diff -u source/vmmon-only/linux/hostif.c source-new/vmmon-only/linux/hostif.c 
+--- source/vmmon-only/linux/hostif.c	2017-06-19 21:54:38.000000000 -0500
++++ source-new/vmmon-only/linux/hostif.c	2017-08-03 17:50:13.499351152 -0500
+@@ -1170,8 +1170,7 @@
+ #elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0)
+    retval = get_user_pages((unsigned long)uvAddr, numPages, 0, 0, ppages, NULL);
+ #else
+-   retval = get_user_pages(current, current->mm, (unsigned long)uvAddr,
+-                           numPages, 0, 0, ppages, NULL);
++   retval = get_user_pages((unsigned long)uvAddr, numPages, 0, ppages, NULL);
+ #endif
+    up_read(&current->mm->mmap_sem);
+ 
