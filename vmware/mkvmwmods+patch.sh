@@ -5,26 +5,27 @@ vmw_source=/usr/lib/vmware/modules/source
 mod_dest=/lib/modules/$(uname -r)/kernel/drivers/misc
 mod_name=(vmnet vmmon)
 vmw_ver=$(/usr/bin/vmware-installer -l | grep workstation | awk '{ print $2 }' | awk -F"." '{print $1 "." $2"." $3}')
-kern_ver=$(uname -r | cut -c 1-3)
+kern_ver=$(uname -r | cut -c 1-4)
 os_ver=$(grep "^VERSION=" /etc/os-release | awk -F"=" '{print $2}' | sed s/\"//g )
 os_pretty_name=$(grep "^PRETTY_NAME" /etc/os-release | awk -F"=" '{print $2}' | sed s/\"//g )
 run_dir="$(/usr/bin/pwd)"
 
-if [[ $vmw_ver == "12.5.7" ]]; then
+if [[ $vmw_ver == "14.0.0" ]]; then
     
     #  If TW then fix lib links
     #  This is NOT needed for Leap or SLES
-    if [ "$os_pretty_name" == "openSUSE Tumbleweed" ] ; then
-        kern_ver=$(uname -r | cut -c 1-4)
+    #  This is outdated as of the release of VMware Workstation 14.0.0
+    #if [ "$os_pretty_name" == "openSUSE Tumbleweed" ] ; then
+    #    kern_ver=$(uname -r | cut -c 1-4)
         #if [ $kern_ver == "4.12" ] ; then
-            cp -r /usr/lib/vmware-installer/2.1.0/lib/lib/libexpat.so.0 /usr/lib/vmware/lib
-            cd /usr/lib/vmware/lib/libz.so.1
-            mv  libz.so.1 libz.so.1.old
-            ln -s /usr/lib64/libz.so ./libz.so
-            ln -s libz.so libz.so.1
-	    cd -
+            #cp -r /usr/lib/vmware-installer/2.1.0/lib/lib/libexpat.so.0 /usr/lib/vmware/lib
+            #cd /usr/lib/vmware/lib/libz.so.1
+            #mv  libz.so.1 libz.so.1.old
+            #ln -s /usr/lib64/libz.so ./libz.so
+            #ln -s libz.so libz.so.1
+	    #cd -
         #fi
-    fi
+    #fi
     # perform cleanup for ALL 
     for i in "${!mod_name[@]}"; do
 	# cleanup directory
@@ -52,6 +53,7 @@ if [[ $vmw_ver == "12.5.7" ]]; then
     done	
     
     # apply patch for Leap + SLES NOT TW
+    # As of VMware Workstation 14.0.0 this has not been tested for Leap or SLES
     if [ "$os_pretty_name" != "openSUSE Tumbleweed" ] ; then
         patchfile="${run_dir}/vmware.patch.423+sles"
         if [[ "$kern_ver" == "4.4" ]]; then
@@ -60,9 +62,9 @@ if [[ $vmw_ver == "12.5.7" ]]; then
             echo "Not kernel 4.4, bypassing patch"
         fi
     else
-        # This is for TW 4.13 kernel only
+        # This is for TW 4.14 kernel only
         patchfile="${run_dir}/vmware.patch.tw"
-        if [ "$kern_ver" == "4.13" ] ; then
+        if [ "$kern_ver" == "4.14" ] ; then
             patch -p 1 -u -d "$vmw_source" -i "$patchfile"
         fi
     fi
