@@ -4,7 +4,7 @@
 vmw_source=/usr/lib/vmware/modules/source
 mod_dest=/lib/modules/$(uname -r)/kernel/drivers/misc
 mod_name=(vmnet vmmon)
-vmw_ver=$(/usr/bin/vmware-installer -l | grep workstation | awk '{ print $2 }' | awk -F"." '{print $1 "." $2"." $3}')
+vmw_ver=$(/usr/bin/vmware -v | awk '{ print $3 }')
 kern_ver=$(uname -r | cut -c 1-4)
 os_ver=$(grep "^VERSION=" /etc/os-release | awk -F"=" '{print $2}' | sed s/\"//g )
 os_pretty_name=$(grep "^PRETTY_NAME" /etc/os-release | awk -F"=" '{print $2}' | sed s/\"//g )
